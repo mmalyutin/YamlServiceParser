@@ -7,6 +7,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceParser {
 
@@ -15,14 +17,51 @@ public class ServiceParser {
 
 	public static void main(String[] args) {
 		ServiceParser _svc = new ServiceParser();
+		_svc.parse();
 	}
 
 	public ServiceParser() {
 		_data = new ServiceData();
 		_svcProps = parseServices();
-		printSvcDependencyTree(_svcProps);
+	}
+
+	public List<ServObj> parse() {
+//		printSvcDependencyTree(_svcProps);
 		genServiceObjects(_svcProps);
-		_data.printData();
+//		_data.printData();
+		return startServices();
+	}
+
+	/** Запуск служб */
+	private List<ServObj> startServices() {
+		List<ServObj> _startingOrder = new ArrayList<ServObj>();
+
+		while (true) {
+			for (ServObj obj : _data.getServObjects()) {
+				if (!obj.serviceStarted() & obj.isDependendServicesStarted()) {
+					obj.runService();
+					_startingOrder.add(obj);
+				}
+			}
+
+			if (allServiceStarted())
+				break;
+		}
+
+		for (ServObj obj: _startingOrder)
+			System.err.println("Run service " + obj.getName());
+
+		return _startingOrder;
+	}
+
+	/** Все службы запущены? */
+	public boolean allServiceStarted() {
+		for (ServObj obj : _data.getServObjects()) {
+			if (!obj.serviceStarted())
+				return false;
+		}
+
+		return true;
 	}
 
 	/** Генерация объектов {@link com.test.ServiceYaml.ServObj} из их описания */

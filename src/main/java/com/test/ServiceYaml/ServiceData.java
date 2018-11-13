@@ -1,6 +1,8 @@
 package com.test.ServiceYaml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,13 @@ public class ServiceData {
 		return  obj;
 	}
 
-	/** Вывод данных об объектах {@link ServObj} */
+	public ArrayList<ServObj> getServObjects() {
+		ArrayList<ServObj> lst = new ArrayList<ServObj>();
+		lst.addAll( _data.values());
+		return lst;
+	}
+
+	/** Вывод графа объектов с их зависимостями {@link ServObj} */
 	public void printData() {
 		_data.forEach((serviceName, servObj) -> {
 
@@ -52,9 +60,9 @@ public class ServiceData {
 
 			String result = "Service name: " + serviceName;
 			if (!parObjects.equals(""))
-				result += ", parent objects = " + parObjects;
+				result += ", parent objects for [" + parObjects + "]";
 			if (!depObjects.equals(""))
-				result += ", dependent objects = " + depObjects;
+				result += ", dependent from objects [" + depObjects + "]";
 
 			System.out.println(result);
 		});
