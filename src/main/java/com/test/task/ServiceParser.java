@@ -1,29 +1,55 @@
 package com.test.task;
 
+import com.test.ServiceYaml.ServObj;
+import com.test.ServiceYaml.ServiceData;
 import com.test.ServiceYaml.ServiceProperties;
-import com.test.customer.Customer;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.InputStream;
 
 public class ServiceParser {
+
+	private ServiceData _data;
+	private ServiceProperties _svcProps;
+
 	public static void main(String[] args) {
 		ServiceParser _svc = new ServiceParser();
-		ServiceProperties services = _svc.parseServices();
+	}
 
-		printSvcDepedencyTree(services);
+	public ServiceParser() {
+		_data = new ServiceData();
+		_svcProps = parseServices();
+		printSvcDependencyTree(_svcProps);
+		genServiceObjects(_svcProps);
+		_data.printData();
+	}
 
-//		_svc.parseServices();
-//		_svc.parseCustomer();
+	/** Генерация объектов {@link com.test.ServiceYaml.ServObj} из их описания */
+	private void genServiceObjects(ServiceProperties _svcProps) {
+		_svcProps.getServices().stream().forEach(service -> {
+			// Заполнение данных родителького или корневого объекта
+			ServObj parentSvcObj = _data.getServObj(service.getService());
+
+			// Заполнение данных дочерних объектов, если таковые имеются
+			if (service.getDependsOn() != null)
+				service.getDependsOn().stream().forEach(depSvcName -> {
+					// Прописываем ссылку на дочерний объект родительскому объекту
+					parentSvcObj.addDepService(_data.getServObj(depSvcName));
+
+					// Получение дочернего объекта и заполнение ссылок
+					ServObj childSvcObj = _data.getServObj(depSvcName);
+					childSvcObj.addParentService(parentSvcObj);
+				});
+		});
 	}
 
 	/** Вывод дерева служб и их зависимостей */
-	private static void printSvcDepedencyTree(ServiceProperties services) {
-		services.getServices().stream().forEach(service -> {
+	private void printSvcDependencyTree(ServiceProperties _svcProps) {
+		_svcProps.getServices().stream().forEach(service -> {
 			System.out.println(service.getService());
 			if (service.getDependsOn() != null)
-				service.getDependsOn().stream().forEach(dep -> System.out.println("\t" + dep.toString()));
+				service.getDependsOn().stream().forEach(dep -> System.out.println("\t" + dep));
 		});
 	}
 
@@ -36,16 +62,5 @@ public class ServiceParser {
 		ServiceProperties services = yaml.load(inputStream);
 
 		return services;
-	}
-
-	/** Пример парсинга и мэппинга YAML */
-	private void parseCustomer() {
-		Yaml yaml = new Yaml(new Constructor(Customer.class));
-		InputStream inputStream = this.getClass()
-				.getClassLoader()
-				.getResourceAsStream("data/customer_with_contact_details_and_address.yaml");
-		Customer customer = yaml.load(inputStream);
-
-		customer.getContactDetails().stream().forEach(contact -> System.out.println(contact.getNumber() + " : " + contact.getType()));
 	}
 }

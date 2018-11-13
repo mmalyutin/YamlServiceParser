@@ -2,7 +2,7 @@ package com.test.ServiceYaml;
 
 import java.util.List;
 
-public class Service {
+public class ServiceDesc {
 	String service;
 	List<String> dependsOn;
 

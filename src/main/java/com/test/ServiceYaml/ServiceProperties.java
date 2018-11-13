@@ -3,13 +3,13 @@ package com.test.ServiceYaml;
 import java.util.List;
 
 public class ServiceProperties {
-	List<Service> services;
+	List<ServiceDesc> services;
 
-	public List<Service> getServices() {
+	public List<ServiceDesc> getServices() {
 		return services;
 	}
 
-	public void setServices(List<Service> services) {
+	public void setServices(List<ServiceDesc> services) {
 		this.services = services;
 	}
 }
