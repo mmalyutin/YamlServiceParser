@@ -1,0 +1,13 @@
+services:
+- service: service2
+  dependsOn:
+  - 'postgres'
+  - 'service3'
+- service: service3
+  dependsOn:
+  - 'redis'
+- service: service4
+  dependsOn:
+  - 'postgres'
+- service: redis
+- service: postgres
