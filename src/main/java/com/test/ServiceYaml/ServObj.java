@@ -3,7 +3,7 @@ package com.test.ServiceYaml;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServObj {
+public class ServObj implements Comparable<ServObj> {
 	/** Название службы */
 	private String name;
 	/** Родительская служба для други служб */
@@ -12,10 +12,15 @@ public class ServObj {
 	private List<ServObj> depServices;
 	/** Служба запущена? */
 	private boolean started;
+	/** Уровень вершины в графе */
+	private Integer nodeLevel;
 
 	public ServObj(String name) {
 		this.started = false;
 		this.name = name;
+		this.nodeLevel = null;
+		this.parentServices = null;
+		this.depServices = null;
 	}
 
 	public String getName() {
@@ -72,5 +77,39 @@ public class ServObj {
 		}
 
 		return true;
+	}
+
+	/** Возврат веса вершины в графе */
+	public Integer getNodeLevel() {
+		// Если уровень вершины ещё небыл вычислен, то вычисляем его
+		if (nodeLevel == null)
+			nodeLevel = calculateNodeLevel(0, this.depServices);
+
+		return nodeLevel;
+	}
+
+	/** Вычисление уровня вершины в графе */
+	private Integer calculateNodeLevel(Integer initNodeLvl, List<ServObj> childNodes) {
+		Integer curNodeLevel = initNodeLvl + 1;
+
+		// Дошли до конечного узла или узел автономен
+		if (childNodes == null)
+			return curNodeLevel;
+
+		// Обход дочерних узлов
+		Integer nestedNodeLevel;
+		for (ServObj obj : childNodes) {
+			// Получение уровня дочернего узла
+			nestedNodeLevel = calculateNodeLevel(curNodeLevel, obj.getDepServices());
+			// Определение уровня максимальной вложенности
+			curNodeLevel = Math.max(curNodeLevel, nestedNodeLevel);
+		}
+
+		return curNodeLevel;
+	}
+
+	@Override
+	public int compareTo(ServObj o) {
+		return this.getNodeLevel().compareTo(o.getNodeLevel());
 	}
 }

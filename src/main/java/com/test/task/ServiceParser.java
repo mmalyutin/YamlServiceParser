@@ -48,8 +48,8 @@ public class ServiceParser {
 				break;
 		}
 
-		for (ServObj obj: _startingOrder)
-			System.err.println("Run service " + obj.getName());
+//		for (ServObj obj: _startingOrder)
+//			System.err.println("Run service " + obj.getName());
 
 		return _startingOrder;
 	}
